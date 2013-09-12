@@ -29,6 +29,7 @@ import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.WorldCreator;
+import org.bukkit.configuration.ConfigurationSection;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -61,28 +62,90 @@ public class StargateDBManager {
     /** The Get all indv perm statement. */
     private static volatile PreparedStatement getAllIndvPermStatement = null;
 
+    
+    
+    // Start Smith_61 Edit
+    
+    
+    public static Connection getConnection() {
+    	if(!StargateDBManager.isConnected()) {
+    		StargateDBManager.connectDB();
+    	}
+    	
+    	return StargateDBManager.wormholeSQLConnection;
+    }
+    
+    
+    // End Smith_61 Edit
+    
+    
+    
     /**
      * Connect db.
      */
     private static void connectDB() {
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (final Exception e) {
-            WXTLogger.prettyLog(Level.SEVERE, false, "ERROR: failed to load SQLITE JDBC driver.");
-            e.printStackTrace();
-            return;
-        }
-
-        try {
-            if ((wormholeSQLConnection == null) || wormholeSQLConnection.isClosed()) {
-                setWormholeSQLConnection(DriverManager.getConnection("jdbc:sqlite:./plugins/WormholeXTreme/WormholeXTremeDB/WormholeXTreme.sqlite", "sa", ""));
-                wormholeSQLConnection.setAutoCommit(true);
-            } else {
-                WXTLogger.prettyLog(Level.SEVERE, false, "WormholeDB already connected.");
-            }
-        } catch (final SQLException e) {
-            WXTLogger.prettyLog(Level.SEVERE, false, "Failed to intialized internal DB. Stargates will not be saved: " + e.getMessage());
-        }
+    	// Start Smith_61 Edit
+    	
+//        try {
+//            Class.forName("org.sqlite.JDBC");
+//        } catch (final Exception e) {
+//            WXTLogger.prettyLog(Level.SEVERE, false, "ERROR: failed to load SQLITE JDBC driver.");
+//            e.printStackTrace();
+//            return;
+//        }
+//
+//        try {
+//            if ((wormholeSQLConnection == null) || wormholeSQLConnection.isClosed()) {
+//                setWormholeSQLConnection(DriverManager.getConnection("jdbc:sqlite:./plugins/WormholeXTreme/WormholeXTremeDB/WormholeXTreme.sqlite", "sa", ""));
+//                wormholeSQLConnection.setAutoCommit(true);
+//            } else {
+//                WXTLogger.prettyLog(Level.SEVERE, false, "WormholeDB already connected.");
+//            }
+//        } catch (final SQLException e) {
+//            WXTLogger.prettyLog(Level.SEVERE, false, "Failed to intialized internal DB. Stargates will not be saved: " + e.getMessage());
+//        }
+    	
+    	String driver = null;
+    	
+    	ConfigurationSection dbConfig = WormholeXTreme.getThisPlugin().getConfig().getConfigurationSection("database");
+    	
+    	String dbType = dbConfig.getString("type").toLowerCase();
+    	String url = dbConfig.getString("url");
+    	String user = dbConfig.getString("user");
+    	String password = dbConfig.getString("password");
+    	
+    	if(dbType.equals("sqlite")) {
+    		driver = "org.sqlite.JDBC";
+    	}
+    	else if(dbType.equals("mysql")) {
+    		driver = "com.mysql.jdbc.Driver";
+    	}
+    	else {
+    		WXTLogger.prettyLog(Level.WARNING, false, "Invalid database type: " + dbType + ". Defaulting to SQLite");
+    		
+    		dbType = "sqlite";
+    		driver = "org.sqlite.JDBC";
+    	}
+    	
+    	try {
+    		Class.forName(driver);
+    		
+    		url = String.format("jdbc:%s:%s", dbType, url);
+    		
+    		StargateDBManager.setWormholeSQLConnection(DriverManager.getConnection(url, user, password));
+    		StargateDBManager.wormholeSQLConnection.setAutoCommit(true);
+    	}
+    	catch(ClassNotFoundException cnfe) {
+    		WXTLogger.prettyLog(Level.SEVERE, false, "Missing driver class: " + driver);
+    		cnfe.printStackTrace();
+    	}
+    	catch (SQLException e) {
+			WXTLogger.prettyLog(Level.SEVERE, false, "Error connecting to database");
+			e.printStackTrace();
+		}
+    	
+    	
+    	// End Smith_61 Edit
     }
 
     public static boolean isConnected() {

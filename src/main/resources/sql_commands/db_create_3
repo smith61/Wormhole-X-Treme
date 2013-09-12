@@ -1,6 +1,6 @@
 CREATE TABLE Configurations
 (
-	Key VARCHAR(255),
+	Config_Key VARCHAR(255),
 	Value VARCHAR(255)
 );
 

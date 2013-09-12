@@ -21,6 +21,7 @@
 package de.luricos.bukkit.WormholeXTreme.Wormhole.utils;
 
 import de.luricos.bukkit.WormholeXTreme.Wormhole.WormholeXTreme;
+import de.luricos.bukkit.WormholeXTreme.Wormhole.model.StargateDBManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -213,22 +214,37 @@ public class DBUpdateUtil {
             }
         }
 
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (final ClassNotFoundException e) {
-            WXTLogger.prettyLog(Level.FINE, false, e.getMessage());
-            return false;
+        
+        
+        // Start Smith_61 Edit
+        
+        
+//        try {
+//            Class.forName("org.sqlite.JDBC");
+//        } catch (final ClassNotFoundException e) {
+//            WXTLogger.prettyLog(Level.FINE, false, e.getMessage());
+//            return false;
+//        }
+//
+//        try {
+//            sql_con = DriverManager.getConnection("jdbc:sqlite:./plugins/WormholeXTreme/WormholeXTremeDB/WormholeXTreme.sqlite", "sa", "");
+//            sql_con.setAutoCommit(true);
+//            sql_con.prepareStatement("PRAGMA journal_mode = TRUNCATE;VACUUM;").executeQuery().close();
+//        } catch (final SQLException e) {
+//            WXTLogger.prettyLog(Level.FINE, false, e.getMessage());
+//            return false;
+//        }
+        
+        DBUpdateUtil.sql_con = StargateDBManager.getConnection();
+        if(DBUpdateUtil.sql_con == null) {
+        	return false;
         }
 
-        try {
-            sql_con = DriverManager.getConnection("jdbc:sqlite:./plugins/WormholeXTreme/WormholeXTremeDB/WormholeXTreme.sqlite", "sa", "");
-            sql_con.setAutoCommit(true);
-            sql_con.prepareStatement("PRAGMA journal_mode = TRUNCATE;VACUUM;").executeQuery().close();
-        } catch (final SQLException e) {
-            WXTLogger.prettyLog(Level.FINE, false, e.getMessage());
-            return false;
-        }
-
+        
+        // End Smith_61 Edit
+        
+        
+        
         final int version = getCurrentVersion();
         final int count = getCountDBFiles();
 

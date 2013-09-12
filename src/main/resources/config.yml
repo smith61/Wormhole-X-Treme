@@ -1,0 +1,5 @@
+database:
+    type: sqlite
+    url: ./plugins/WormholeXTreme/WormholeXTremeDB/WormholeXTreme.sqlite
+    user: sa
+    password: 

@@ -43,6 +43,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
@@ -105,6 +106,10 @@ public class WormholeXTreme extends JavaPlugin {
 
         // Load our shapes, stargates, and internal permissions.
         StargateHelper.loadShapes();
+        
+        if(!(new File(this.getDataFolder()," config.yml").exists())) {
+        	this.saveDefaultConfig();
+        }
 
         WXTLogger.prettyLog(Level.INFO, true, "Load complete");
     }
