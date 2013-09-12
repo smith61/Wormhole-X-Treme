@@ -10,6 +10,10 @@
     </properties>
     <url>https://github.com/lycano/Wormhole-X-Treme</url>
     <repositories>
+    	<repository>
+    		<id>bukkit-repo</id>
+    		<url>http://repo.bukkit.org/content/groups/public/</url>
+    	</repository>
         <repository>
             <id>luricos.de-repo</id>
             <url>http://repo.luricos.de/bukkit-plugins/</url>
@@ -66,13 +70,6 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.4.6-R0.3</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>ru.tehkode</groupId>
             <artifactId>PermissionsEx</artifactId>
             <version>[1.19,)</version>
@@ -84,6 +81,11 @@
             <artifactId>WormholeXTremeWorlds</artifactId>
             <version>[0.508,)</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+        	<groupId>org.bukkit</groupId>
+        	<artifactId>bukkit</artifactId>
+        	<version>1.6.2-R1.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
