@@ -26,6 +26,8 @@ import de.luricos.bukkit.WormholeXTreme.Wormhole.logic.StargateUpdateRunnable.Ac
 import de.luricos.bukkit.WormholeXTreme.Wormhole.player.WormholePlayerManager;
 import de.luricos.bukkit.WormholeXTreme.Wormhole.utils.WXTLogger;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -151,9 +153,28 @@ public class StargateManager {
     /**
      * Adds the given stargate to the list of stargates. Also adds all its blocks to big block index.
      * 
+     * Returns false if another gate shares at least one block with another gate
+     * 
      * @param s The Stargate you want added.
+     * 
+     * @return If the gate was added.
      */
-    protected static void addStargate(Stargate s) {
+    protected static boolean addStargate(Stargate s) {
+    	// Start Smith_61 Edit
+    	
+    	for(Location b : s.getGateStructureBlocks()) {
+    		if(getAllGateBlocks().containsKey(b)) {
+    			return false;
+    		}
+    	}
+    	
+    	for(Location b : s.getGatePortalBlocks()) {
+    		if(getAllGateBlocks().containsKey(b)) {
+    			return false;
+    		}
+    	}
+    	
+    			
         getStargateList().put(s.getGateName(), s);
         
         for (Location b : s.getGateStructureBlocks()) {
@@ -163,6 +184,10 @@ public class StargateManager {
         for (Location b : s.getGatePortalBlocks()) {
             getAllGateBlocks().put(b, s);
         }
+        
+        return true;
+        
+        // End Smith_61 Edit
     }
 
     // Network functions
@@ -195,15 +220,29 @@ public class StargateManager {
         if (posDupe != null)
             return false;
         
-        stargate.setGateOwner(playerName);
-        stargate.completeGate(stargate.getGateName(), "");
+        // Start Smith_61 Edit
         
-        WXTLogger.prettyLog(Level.INFO, false, "Player: " + playerName + " completed a wormhole: " + stargate.getGateName());
         
-        addStargate(stargate);
-        StargateDBManager.stargateToSQL(stargate);
+        if(addStargate(stargate)) {
+        	stargate.setGateOwner(playerName);
+        	stargate.completeGate(stargate.getGateName(), "");
         
-        return true;
+        	WXTLogger.prettyLog(Level.INFO, false, "Player: " + playerName + " completed a wormhole: " + stargate.getGateName());
+        	
+        	StargateDBManager.stargateToSQL(stargate);
+        	
+        	return true;
+        }
+        else {
+        	Player player = Bukkit.getPlayer(playerName);
+        	if(player != null) {
+        		player.sendMessage(ChatColor.RED + "Stargate shares blocks with another gate.");
+        	}
+        	
+        	return false;
+        }
+        
+        // End Smith_61 Edit
     }
     
     /**
@@ -245,24 +284,39 @@ public class StargateManager {
         final Stargate complete = getIncompleteStargates().remove(playerName);
         
         if (complete != null) {
-            if (!network.equals("")) {
-                StargateNetwork net = StargateManager.getStargateNetwork(network);
-                if (net == null) {
-                    net = StargateManager.addStargateNetwork(network);
-                }
-                StargateManager.addGateToNetwork(complete, network);
-                complete.setGateNetwork(net);
-            }
-
-            complete.setGateOwner(playerName);
-            complete.completeGate(gateName, idc);
-            
-            WXTLogger.prettyLog(Level.INFO, false, "Player: " + playerName + " completed a wormhole: " + complete.getGateName());
-            
-            addStargate(complete);
-            StargateDBManager.stargateToSQL(complete);
-            
-            return true;
+        	// Start Smith_61 Edit
+        	
+        	
+        	if(addStargate(complete)) {
+	            if (!network.equals("")) {
+	                StargateNetwork net = StargateManager.getStargateNetwork(network);
+	                if (net == null) {
+	                    net = StargateManager.addStargateNetwork(network);
+	                }
+	                StargateManager.addGateToNetwork(complete, network);
+	                complete.setGateNetwork(net);
+	            }
+	
+	            complete.setGateOwner(playerName);
+	            complete.completeGate(gateName, idc);
+	            
+	            WXTLogger.prettyLog(Level.INFO, false, "Player: " + playerName + " completed a wormhole: " + complete.getGateName());
+	            
+	            StargateDBManager.stargateToSQL(complete);
+	            
+	            return true;
+        	}
+        	else {
+        		Player player = Bukkit.getPlayer(playerName);
+        		if(player != null) {
+        			player.sendMessage(ChatColor.RED + "Stargate shares blocks with another stargate.");
+        		}
+        		
+        		return false;
+        	}
+        	
+        	
+        	// End Smith_61 Edit
         }
 
         return false;        

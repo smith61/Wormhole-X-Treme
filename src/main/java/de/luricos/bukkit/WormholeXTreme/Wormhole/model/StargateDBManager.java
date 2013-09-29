@@ -278,9 +278,16 @@ public class StargateDBManager {
                             }
                         }
                     }
-                    StargateManager.addStargate(s);
-
-                    WXTLogger.prettyLog(Level.FINE, false, "Loading Stargate: '" + s.getGateName() + "', GateFace: '" + s.getGateFacing().name() +"' from DB");
+                    // Start Smith_61 Edit
+                    
+                    
+                    if(StargateManager.addStargate(s)) {
+                    	WXTLogger.prettyLog(Level.FINE, false, "Loading Stargate: '" + s.getGateName() + "', GateFace: '" + s.getGateFacing().name() +"' from DB");
+                    }
+                    else {
+                    	WXTLogger.prettyLog(Level.WARNING, false, "Failed to load Stargate: '" + s.getGateName() + "'. Removing gate from database.");
+                    	StargateDBManager.removeStargateFromSQL(s);
+                    }
                 } else {
                     WXTLogger.prettyLog(Level.WARNING, true, "Failed to load Stargate '" + sn + "' from DB.");
                 }
