@@ -163,13 +163,13 @@ public class StargateManager {
     	// Start Smith_61 Edit
     	
     	for(Location b : s.getGateStructureBlocks()) {
-    		if(getAllGateBlocks().containsKey(b)) {
+    		if(getAllGateBlocks().get(b) != null && getAllGateBlocks().get(b) != s) {
     			return false;
     		}
     	}
     	
     	for(Location b : s.getGatePortalBlocks()) {
-    		if(getAllGateBlocks().containsKey(b)) {
+    		if(getAllGateBlocks().get(b) != null && getAllGateBlocks().get(b) != s) {
     			return false;
     		}
     	}
@@ -221,12 +221,13 @@ public class StargateManager {
             return false;
         
         // Start Smith_61 Edit
+        stargate.setGateName(stargate.getGateName());
         
         
         if(addStargate(stargate)) {
         	stargate.setGateOwner(playerName);
         	stargate.completeGate(stargate.getGateName(), "");
-        
+        	
         	WXTLogger.prettyLog(Level.INFO, false, "Player: " + playerName + " completed a wormhole: " + stargate.getGateName());
         	
         	StargateDBManager.stargateToSQL(stargate);
@@ -286,8 +287,12 @@ public class StargateManager {
         if (complete != null) {
         	// Start Smith_61 Edit
         	
+        	complete.setGateName(gateName);
         	
         	if(addStargate(complete)) {
+                complete.setGateOwner(playerName);
+                complete.completeGate(gateName, idc);
+                
 	            if (!network.equals("")) {
 	                StargateNetwork net = StargateManager.getStargateNetwork(network);
 	                if (net == null) {
@@ -296,9 +301,6 @@ public class StargateManager {
 	                StargateManager.addGateToNetwork(complete, network);
 	                complete.setGateNetwork(net);
 	            }
-	
-	            complete.setGateOwner(playerName);
-	            complete.completeGate(gateName, idc);
 	            
 	            WXTLogger.prettyLog(Level.INFO, false, "Player: " + playerName + " completed a wormhole: " + complete.getGateName());
 	            
