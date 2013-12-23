@@ -23,8 +23,12 @@ package de.luricos.bukkit.WormholeXTreme.Wormhole.utils;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  *
@@ -40,13 +44,25 @@ public class WXTLogger {
         if (WXTLogger.logger == null) {
             Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin(pluginName);
             if (plugin != null) {
-                WXTLogger.logger = Logger.getLogger(plugin.getServer().getLogger().getName() + "." + pluginName);
+                WXTLogger.logger = plugin.getLogger();
             }
             
             WXTLogger.logLevel = logLevel;
             WXTLogger.logger.setLevel(logLevel);
             WXTLogger.logPluginName = pluginName;
             WXTLogger.logPluginVersion = pluginVersion;
+            
+            try {
+                plugin.getDataFolder().mkdirs();
+                
+				FileHandler handler = new FileHandler(plugin.getDataFolder() + "/WXT.log");
+				handler.setLevel(Level.ALL);
+				handler.setFormatter(new SimpleFormatter());
+				WXTLogger.logger.addHandler(handler);
+			}
+            catch (IOException e) {
+				prettyLog(Level.SEVERE, true, "Unable to initialize log file. WXT logs will not be saved to file.");
+			}
         }
     }
     
@@ -56,9 +72,8 @@ public class WXTLogger {
     }
     
     public static void prettyLog(final Level logLevel, final boolean version, final String message) {
-        final String prettyName = ("[" + getName() + "]");
         final String prettyVersion = ("[v" + getVersion() + "]");
-        String prettyLogLine = prettyName;
+        String prettyLogLine = "";
         if (version) {
             prettyLogLine += prettyVersion;
         }
